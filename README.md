@@ -58,7 +58,7 @@ Laravel-CRUD/
    ```bash
    git clone https://github.com/Ipangbbd/Laravel-CRUD.git
    cd Laravel-CRUD
-````
+   ```
 
 2. Install Composer dependencies:
 
