@@ -1,56 +1,235 @@
 @extends('layout')
 
+@section('title', 'Create Post - Laravel CRUD')
+@section('page-title', 'Create New Post')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item">
+        <a href="{{ route('posts.index') }}">Posts</a>
+    </li>
+    <li class="breadcrumb-item active">Create</li>
+@endsection
+
 @section('content')
-    <h1 class="text-3xl font-bold text-blue-800 dark:text-blue-200 mb-6">Create New Post</h1>
+
+    {{-- Error Messages --}}
     @if ($errors->any())
-        <div class="bg-red-100 border border-red-300 text-red-800 px-4 sm:px-6 py-3 sm:py-4 rounded mb-6 dark:bg-red-900 dark:border-red-700 dark:text-red-200 text-sm sm:text-base">
-            <ul class="list-disc pl-5">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <h6 class="alert-heading mb-2">Please correct the following errors:</h6>
+                    <ul class="mb-0 ps-3">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
         </div>
     @endif
-    <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data" class="bg-white dark:bg-gray-900 p-4 sm:p-8 rounded shadow-md w-full max-w-xl mx-auto">
-        @csrf
-        <div class="mb-5">
-            <label for="title" class="block font-semibold text-gray-700 dark:text-gray-200 mb-2">Title</label>
-            <input type="text" id="title" name="title" value="{{ old('title') }}" required class="w-full border border-gray-300 dark:border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-gray-100 text-sm sm:text-base">
+
+    {{-- Create Post Form --}}
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <form action="{{ route('posts.store') }}" 
+                          method="POST" 
+                          enctype="multipart/form-data">
+                        @csrf
+
+                        {{-- Title --}}
+                        <div class="mb-3">
+                            <label for="title" class="form-label">
+                                Title <span class="text-danger">*</span>
+                            </label>
+                            <input  type="text"
+                                    id="title"
+                                    name="title"
+                                    value="{{ old('title') }}"
+                                    required
+                                    placeholder="Enter post title"
+                                    class="form-control @error('title') is-invalid @enderror">
+                            @error('title')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        {{-- Content --}}
+                        <div class="mb-3">
+                            <label for="content" class="form-label">
+                                Content <span class="text-danger">*</span>
+                            </label>
+                            <textarea   id="content"
+                                        name="content"
+                                        rows="6"
+                                        required
+                                        placeholder="Write your post content here..."
+                                        class="form-control @error('content') is-invalid @enderror">{{ old('content') }}</textarea>
+                            @error('content')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        {{-- Genre & Category --}}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="genre_id" class="form-label">
+                                        Genre <span class="text-danger">*</span>
+                                    </label>
+                                    <select id="genre_id"
+                                            name="genre_id"
+                                            required
+                                            class="form-select @error('genre_id') is-invalid @enderror">
+                                        <option value="">Select a genre</option>
+                                        @foreach ($genres as $genre)
+                                            <option value="{{ $genre->id }}" 
+                                                    {{ old('genre_id') == $genre->id ? 'selected' : '' }}>
+                                                {{ $genre->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('genre_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="category_id" class="form-label">Category</label>
+                                    <select id="category_id"
+                                            name="category_id"
+                                            class="form-select @error('category_id') is-invalid @enderror">
+                                        <option value="">Select a category (optional)</option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}" 
+                                                    {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('category_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Featured Image --}}
+                        <div class="mb-4">
+                            <label for="image" class="form-label">Featured Image</label>
+                            <input  type="file"
+                                    id="image"
+                                    name="image"
+                                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                                    class="form-control @error('image') is-invalid @enderror">
+                            <div class="form-text">
+                                <small class="text-muted">
+                                    Accepted formats: JPG, JPEG, PNG, WEBP. Maximum size: 10MB.
+                                </small>
+                            </div>
+                            @error('image')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        {{-- Image Preview --}}
+                        <div class="mb-3" id="imagePreview" style="display: none;">
+                            <label class="form-label">Image Preview</label>
+                            <div class="border rounded p-3 bg-light d-flex align-items-center">
+                                <img    id="previewImg" src="" alt="Preview" 
+                                        class="img-thumbnail" 
+                                        style="max-width: 200px; max-height: 200px;">
+                                <button type="button" 
+                                        id="removePreview" 
+                                        class="btn btn-sm btn-outline-danger ms-2">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Action Buttons --}}
+                        <div class="d-flex gap-2 justify-content-end flex-wrap">
+                            <a href="{{ route('posts.index') }}" class="btn btn-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                Create Post
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="mb-8">
-            <label for="category_id" class="block font-semibold text-gray-700 dark:text-gray-200 mb-2">Category</label>
-            <select id="category_id" name="category_id" class="w-full border border-gray-300 dark:border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-gray-100 text-sm sm:text-base">
-                <option value="">Select a category</option>
-                @foreach ($categories as $category)
-                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                        {{ $category->name }}
-                    </option>
-                @endforeach
-            </select>
+    </div>
+
+    {{-- Quick Actions --}}
+    <div class="row justify-content-center mt-4">
+        <div class="col-12 col-lg-8">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="card-title mb-0">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted mb-3">
+                        Need to create new genres or categories?
+                    </p>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a  href="{{ route('genres.create') }}" 
+                            class="btn btn-outline-success btn-sm">
+                            Add New Genre
+                        </a>
+                        <a  href="{{ route('categories.create') }}" 
+                            class="btn btn-outline-info btn-sm">
+                            Add New Category
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="mb-8">
-            <label for="image" class="block font-semibold text-gray-700 dark:text-gray-200 mb-2">Image</label>
-            <input type="file" id="image" name="image" accept="image/*" class="w-full border border-gray-300 dark:border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-gray-100 text-sm sm:text-base">
-            <p class="text-xs text-gray-500 mt-1">Accepted: jpg, jpeg, png, webp. Max 10MB.</p>
-        </div>
-        <div class="mb-5">
-            <label for="content" class="block font-semibold text-gray-700 dark:text-gray-200 mb-2">Content</label>
-            <textarea id="content" name="content" required class="w-full border border-gray-300 dark:border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 min-h-[100px] dark:bg-gray-800 dark:text-gray-100 text-sm sm:text-base">{{ old('content') }}</textarea>
-        </div>
-        <div class="mb-8">
-            <label for="genre_id" class="block font-semibold text-gray-700 dark:text-gray-200 mb-2">Genre</label>
-            <select id="genre_id" name="genre_id" required class="w-full border border-gray-300 dark:border-gray-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-gray-100 text-sm sm:text-base">
-                <option value="">Select a genre</option>
-                @foreach ($genres as $genre)
-                    <option value="{{ $genre->id }}" {{ old('genre_id') == $genre->id ? 'selected' : '' }}>
-                        {{ $genre->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded shadow transition w-full sm:w-auto">Create Post</button>
-            <a href="{{ route('posts.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 font-semibold px-6 py-2 rounded shadow transition w-full sm:w-auto text-center">Cancel</a>
-        </div>
-    </form>
+    </div>
+@endsection
+
+@section('scripts')
+<script>
+    // Image preview
+    document.getElementById('image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const previewDiv = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                previewDiv.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewDiv.style.display = 'none';
+        }
+    });
+
+    // Remove preview
+    document.getElementById('removePreview').addEventListener('click', function() {
+        document.getElementById('image').value = '';
+        document.getElementById('imagePreview').style.display = 'none';
+    });
+
+    // Client-side form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const title = document.getElementById('title').value.trim();
+        const content = document.getElementById('content').value.trim();
+        const genre = document.getElementById('genre_id').value;
+
+        if (!title || !content || !genre) {
+            e.preventDefault();
+            alert('Please fill in all required fields (Title, Content, and Genre).');
+            return false;
+        }
+    });
+</script>
 @endsection

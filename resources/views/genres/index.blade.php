@@ -1,154 +1,274 @@
 @extends('layout')
 
+@section('page-title', 'Genres')
+
+@section('breadcrumb')
+    <li class="breadcrumb-item active" aria-current="page">Genres</li>
+@endsection
+
 @section('content')
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4 w-full">
-        <h1 class="text-3xl font-bold text-blue-800 dark:text-blue-200 w-full text-center sm:text-left">Genres</h1>
-    </div>
+<div class="row">
+    <div class="col-12">
 
-    @if ($message = Session::get('success'))
-        <div id="success-toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-green-100 border border-green-300 text-green-800 px-6 py-4 rounded shadow-lg dark:bg-green-900 dark:border-green-700 dark:text-green-200 transition-opacity duration-500">
-            {{ $message }}
+        <!-- Header: Title + Create Button -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="small-title">Manage Genres</h2>
+            <a href="{{ route('genres.create') }}" class="btn btn-icon btn-icon-start btn-primary">
+                <i data-acorn-icon="plus" class="icon" data-acorn-size="18"></i>
+                <span>Create New Genre</span>
+            </a>
         </div>
-        <script>
-            setTimeout(function() {
-                var toast = document.getElementById('success-toast');
-                if (toast) {
-                    toast.style.opacity = '0';
-                    setTimeout(function() { toast.style.display = 'none'; }, 500);
+
+        <!-- Success Toast -->
+        @if ($message = Session::get('success'))
+            <div    id="success-toast" 
+                    class="position-fixed bottom-0 start-50 translate-middle-x mb-3" 
+                    style="z-index: 1050;">
+                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header bg-success text-white">
+                        <i data-acorn-icon="check-circle" data-acorn-size="16" class="me-2"></i>
+                        <strong class="me-auto">Success</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        {{ $message }}
+                    </div>
+                </div>
+            </div>
+            <script>
+                setTimeout(() => {
+                    const toast = document.getElementById('success-toast');
+                    if (toast) {
+                        const bsToast = new bootstrap.Toast(toast.querySelector('.toast'));
+                        bsToast.hide();
+                    }
+                }, 3000);
+            </script>
+        @endif
+
+        <!-- Genres Table -->
+        <div class="card mb-5">
+            <div class="card-header">
+                <h5 class="card-title">All Genres</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-primary">
+                            <tr>
+                                <th scope="col" class="text-muted text-small text-uppercase">ID</th>
+                                <th scope="col" class="text-muted text-small text-uppercase">Name</th>
+                                <th scope="col" class="text-muted text-small text-uppercase text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($genres as $genre)
+                                <tr>
+                                    <!-- Genre ID -->
+                                    <td class="text-alternate">{{ $genre->id }}</td>
+
+                                    <!-- Genre Name (inline-edit) -->
+                                    <td>
+                                        <!-- Display -->
+                                        <div class="genre-name-display cursor-pointer fw-bold text-primary" data-genre-id="{{ $genre->id }}">
+                                            {{ $genre->name }}
+                                            <i data-acorn-icon="edit" class="text-muted ms-2" data-acorn-size="14"></i>
+                                        </div>
+
+                                        <!-- Edit Form -->
+                                        <form   action="{{ route('genres.update', $genre->id) }}" 
+                                                method="POST" 
+                                                class="genre-edit-form d-none" 
+                                                data-genre-id="{{ $genre->id }}">
+                                            @csrf
+                                            @method('PUT')
+
+                                            <div class="d-flex align-items-center gap-2">
+                                                <input  type="text" 
+                                                        name="name" 
+                                                        value="{{ $genre->name }}" 
+                                                        class="form-control form-control-sm">
+
+                                                <button type="submit" 
+                                                        class="btn btn-sm btn-icon btn-icon-only btn-success">
+                                                    <i data-acorn-icon="check" data-acorn-size="16"></i>
+                                                </button>
+
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-icon btn-icon-only btn-outline-secondary cancel-edit" 
+                                                        data-original-name="{{ $genre->name }}">
+                                                    <i data-acorn-icon="close" data-acorn-size="16"></i>
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td class="text-end">
+                                        <form   action="{{ route('genres.destroy', $genre->id) }}" 
+                                                method="POST" 
+                                                class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    class="btn btn-sm btn-icon btn-icon-only btn-outline-danger"
+                                                    onclick="return confirm('Are you sure you want to delete this genre?')"
+                                                    title="Delete Genre">
+                                                <i data-acorn-icon="bin" data-acorn-size="16"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-5">
+                                        <i data-acorn-icon="tag" class="text-primary mb-3" data-acorn-size="48"></i>
+                                        <br>
+                                        No genres found. 
+                                        <a href="{{ route('genres.create') }}" class="text-primary">Create the first one!</a>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    /**
+     * Inline Edit Toggle
+     */
+    document.querySelectorAll('.genre-name-display').forEach(display => {
+        display.addEventListener('click', function () {
+            const genreId = this.dataset.genreId;
+            const editForm = document.querySelector(`.genre-edit-form[data-genre-id="${genreId}"]`);
+
+            if (editForm) {
+                editForm.classList.remove('d-none');
+                editForm.querySelector('input[name="name"]').focus();
+                this.classList.add('d-none');
+            }
+        });
+    });
+
+    /**
+     * Cancel Edit
+     */
+    document.querySelectorAll('.cancel-edit').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const form = this.closest('.genre-edit-form');
+            const genreId = form.dataset.genreId;
+            const originalName = this.dataset.originalName;
+            const nameInput = form.querySelector('input[name="name"]');
+            const nameDisplay = document.querySelector(`.genre-name-display[data-genre-id="${genreId}"]`);
+
+            nameInput.value = originalName;
+            form.classList.add('d-none');
+            nameDisplay.classList.remove('d-none');
+        });
+    });
+
+    /**
+     * AJAX Update
+     */
+    document.querySelectorAll('.genre-edit-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const genreId = this.dataset.genreId;
+            const nameInput = this.querySelector('input[name="name"]');
+            const newName = nameInput.value.trim();
+            const nameDisplay = document.querySelector(`.genre-name-display[data-genre-id="${genreId}"]`);
+
+            if (!newName) {
+                alert('Genre name cannot be empty');
+                return;
+            }
+
+            // Loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalBtnContent = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="spinner-border spinner-border-sm" role="status"></i>';
+            submitBtn.disabled = true;
+
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ 
+                    name: newName, 
+                    _method: 'PUT' 
+                })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    nameDisplay.firstChild.textContent = newName + ' ';
+                    this.classList.add('d-none');
+                    nameDisplay.classList.remove('d-none');
+                    showSuccessToast(data.message || 'Genre updated successfully');
+                } else {
+                    throw new Error(data.message || 'Unknown error occurred');
                 }
-            }, 3000);
-        </script>
-    @endif
-
-    <div class="overflow-x-auto rounded shadow w-full">
-        <table class="min-w-full bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700 text-sm sm:text-base">
-            <thead class="bg-blue-700 dark:bg-gray-800">
-                <tr>
-                    <th class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-white dark:text-blue-200 uppercase tracking-wider">ID</th>
-                    <th class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-white dark:text-blue-200 uppercase tracking-wider">Name</th>
-                    <th class="px-2 sm:px-6 py-3 text-left text-xs font-bold text-white dark:text-blue-200 uppercase tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                @foreach ($genres as $genre)
-                    <tr class="hover:bg-blue-50 dark:hover:bg-gray-800 transition sm:rounded-none rounded-lg sm:table-row flex flex-col sm:flex-row mb-4 sm:mb-0 bg-white dark:bg-gray-900 sm:bg-transparent sm:dark:bg-transparent shadow sm:shadow-none">
-                        <td class="px-2 sm:px-6 py-2 sm:py-4 text-gray-900 dark:text-gray-100 flex-1">{{ $genre->id }}</td>
-                        <td class="px-2 sm:px-6 py-2 sm:py-4 font-semibold text-blue-900 dark:text-blue-300 flex-1">
-                            <div class="genre-name-display cursor-pointer" data-genre-id="{{ $genre->id }}">{{ $genre->name }}</div>
-                            <form action="{{ route('genres.update', $genre->id) }}" method="POST" class="inline-flex items-center genre-edit-form hidden" data-genre-id="{{ $genre->id }}">
-                                @csrf
-                                @method('PUT')
-                                <input type="text" name="name" value="{{ $genre->name }}" class="border border-gray-300 dark:border-gray-700 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-gray-800 dark:text-gray-100 text-sm sm:text-base w-full">
-                                <button type="submit" class="ml-2 bg-green-100 hover:bg-green-200 text-green-700 dark:bg-green-900 dark:hover:bg-green-800 dark:text-green-200 font-semibold px-2 py-1 rounded transition text-xs sm:text-sm">Save</button>
-                                <button type="button" class="ml-1 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 font-semibold px-2 py-1 rounded transition text-xs sm:text-sm cancel-edit" data-original-name="{{ $genre->name }}">Cancel</button>
-                            </form>
-                        </td>
-                        <td class="px-2 sm:px-6 py-2 sm:py-4 space-x-2 flex flex-row flex-wrap gap-2 sm:gap-0 sm:space-x-2">
-                            <form action="{{ route('genres.destroy', $genre->id) }}" method="POST" class="inline w-full sm:w-auto">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="inline-block bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900 dark:hover:bg-red-800 dark:text-red-200 font-semibold px-3 py-1 rounded transition w-full sm:w-auto text-center">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-    <div class="mt-6 flex justify-center w-full">
-        <a href="{{ route('genres.create') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded shadow transition w-full sm:w-auto text-center">Create New Genre</a>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.genre-name-display').forEach(item => {
-                item.addEventListener('click', function () {
-                    const genreId = this.dataset.genreId;
-                    document.querySelectorAll(`.genre-edit-form[data-genre-id="${genreId}"]`).forEach(form => {
-                        form.classList.remove('hidden');
-                        form.querySelector('input[name="name"]').focus(); // Focus on the input field
-                    });
-                    this.classList.add('hidden');
-                });
-            });
-
-            document.querySelectorAll('.cancel-edit').forEach(item => {
-                item.addEventListener('click', function () {
-                    const genreId = this.closest('.genre-edit-form').dataset.genreId;
-                    const originalName = this.dataset.originalName;
-                    const genreNameInput = this.closest('.genre-edit-form').querySelector('input[name="name"]');
-                    genreNameInput.value = originalName; // Reset input to original value
-
-                    document.querySelectorAll(`.genre-edit-form[data-genre-id="${genreId}"]`).forEach(form => {
-                        form.classList.add('hidden');
-                    });
-                    document.querySelectorAll(`.genre-name-display[data-genre-id="${genreId}"]`).forEach(display => {
-                        display.classList.remove('hidden');
-                    });
-                });
-            });
-
-            document.querySelectorAll('.genre-edit-form').forEach(form => {
-                console.log('Attaching submit listener to form:', form);
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
-
-                    const genreId = this.dataset.genreId;
-                    const genreNameInput = this.querySelector('input[name="name"]');
-                    const newName = genreNameInput.value;
-
-                    console.log('Attempting to save genre:', genreId, newName);
-                    console.log('Form action URL:', this.action);
-                    console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-
-                    fetch(this.action, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({ name: newName, _method: 'PUT' })
-                    })
-                    .then(response => {
-                        console.log('Raw response:', response);
-                        if (!response.ok) {
-                            console.error('HTTP error! status:', response.status);
-                            return response.json().then(err => { throw err; });
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Response data:', data);
-                        if (data.success) {
-                            document.querySelectorAll(`.genre-name-display[data-genre-id="${genreId}"]`).forEach(display => {
-                                display.textContent = newName;
-                                display.classList.remove('hidden');
-                            });
-                            document.querySelectorAll(`.genre-edit-form[data-genre-id="${genreId}"]`).forEach(form => {
-                                form.classList.add('hidden');
-                            });
-                            // Display success toast
-                            const successToast = document.getElementById('success-toast');
-                            if (successToast) {
-                                successToast.textContent = data.message;
-                                successToast.style.opacity = '1';
-                                successToast.style.display = 'block';
-                                setTimeout(function() {
-                                    successToast.style.opacity = '0';
-                                    setTimeout(function() { successToast.style.display = 'none'; }, 500);
-                                }, 3000);
-                            }
-                        } else {
-                            console.error('Server responded with error:', data.message);
-                            alert('Error updating genre: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                        alert('An error occurred while updating the genre: ' + error.message);
-                    });
-                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating genre: ' + error.message);
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalBtnContent;
+                submitBtn.disabled = false;
             });
         });
-    </script>
+    });
+
+    /**
+     * Toast Helper
+     */
+    function showSuccessToast(message) {
+        // Remove existing
+        const existingToast = document.getElementById('success-toast');
+        if (existingToast) existingToast.remove();
+
+        // Insert new
+        const toastHtml = `
+            <div id="success-toast" class="position-fixed bottom-0 start-50 translate-middle-x mb-3" style="z-index: 1050;">
+                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header bg-success text-white">
+                        <i data-acorn-icon="check-circle" data-acorn-size="16" class="me-2"></i>
+                        <strong class="me-auto">Success</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">${message}</div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', toastHtml);
+
+        // Auto-hide
+        setTimeout(() => {
+            const toast = document.getElementById('success-toast');
+            if (toast) {
+                const bsToast = new bootstrap.Toast(toast.querySelector('.toast'));
+                bsToast.hide();
+            }
+        }, 3000);
+    }
+
+});
+</script>
 @endsection
