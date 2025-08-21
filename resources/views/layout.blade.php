@@ -50,6 +50,22 @@
     <script src="{{ asset('js/base/loader.js') }}"></script>
 
     @yield('styles')
+    <style>
+      #logoText {
+        opacity: 0;
+        transition: opacity 0.3s ease; /* smooth fade */
+      }
+
+      #nav:hover #logoText {
+        opacity: 1;
+      }
+      
+      @media (min-width: 1400px) {
+        #logoText {
+          opacity: 1 !important; /* override the hover-based rule */
+        }
+      }
+    </style>
   </head>
 
   <body>
@@ -62,7 +78,7 @@
           <div class="logo position-relative">
             <a href="{{ route('posts.index') }}">
               <div class="img"></div>
-              <span class="text-white fw-bold ms-2">Laravel CRUD</span>
+              <span id="logoText" class="text-white fw-bold ms-2">Laravel CRUD</span>
             </a>
           </div>
           <!-- Logo End -->
@@ -86,7 +102,7 @@
           <!-- Language Switch End -->
 
           <!-- User Menu Start -->
-          <div class="user-container d-flex">
+          <div id="userMenu" class="user-container d-flex">
             <a 
               href="#" 
               class="d-flex user position-relative" 
