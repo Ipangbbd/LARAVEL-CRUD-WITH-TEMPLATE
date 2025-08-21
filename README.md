@@ -10,6 +10,10 @@ A simple **Laravel-based CRUD application** to manage data with clean MVC struct
 
 ---
 
+![App Screenshot](public/img/screenshot.png)
+
+---
+
 ##  Main Features
 
 -  **CRUD Operations** – Create, Read, Update, Delete records seamlessly  
