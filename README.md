@@ -1,6 +1,6 @@
 #  Laravel CRUD School Project
 
-[![Laravel](https://img.shields.io/badge/Laravel-10.x-red?logo=laravel)](https://laravel.com)
+[![Laravel](https://img.shields.io/badge/Laravel-12.x-red?logo=laravel)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.1-blue?logo=php)](https://www.php.net)
 [![Database](https://img.shields.io/badge/Database-MySQL-informational?logo=mysql)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
